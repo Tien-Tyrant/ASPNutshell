@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AspNetCoreTodo.Data;
@@ -8,11 +9,22 @@ namespace AspNetCoreTodo.Services
 {
     public class TodoItemService : ITodoItemService
     {
-        private readonly ApplicationDbContext _context;
 
         public TodoItemService(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<bool> AddItemAsync(TodoItem newItem)
+        {
+            newItem.Id = Guid.NewGuid();
+            newItem.IsDone = false;
+            newItem.DueAt = DateTimeOffset.Now.AddDays(3);
+
+            _context.Items.Add(newItem);
+
+            var saveResult = await _context.SaveChangesAsync();
+            return saveResult == 1;
         }
 
         public async Task<TodoItem[]> GetIncompleteItemsAsync()
